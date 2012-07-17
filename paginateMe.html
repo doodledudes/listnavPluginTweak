@@ -38,8 +38,8 @@
 			                'tblList'   :  selector+'List-nav',
 			                'tmpList'   :  selector+"List",
 			                'colToSort' :  '0', // default to sort the First Column of the lists
-			                'excludeRow':  '', // max rows Displayed
-			                'placeNavTo':  '' // place the pagination links to the specified selector
+			                'excludeRow':  '', // exclude rows with these selectors
+			                'placeNavTo':  '' // place the pagination links in the specified selector
 		                },options);
 		                var col = s.colToSort - 1;
 		                var sortByColNum = col < 0 ? 0 : col;

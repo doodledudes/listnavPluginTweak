@@ -1,0 +1,317 @@
+<html>
+<title>PaginateMe - navlist plugin Tweak</title>
+<head>
+	<script type="text/javascript" src="jquery.js"></script>
+	<script type="text/javascript" src="cookies.js"></script>
+	<script type="text/javascript" src="listnav-pack.js"></script>
+	<script type="text/javascript" src="listnav.js"></script>
+	<link href="listnav.css" rel="stylesheet" type="text/css" />
+	
+	<script type="text/javascript">
+	        /*
+	         * reset pagination Generated cookies
+	         * Invoke this function on the login button
+	        */
+	        function resetPaginationCookiesOnFirstLoad() {
+                        var cookies = document.cookie.split(";");
+                        for(var i=0; i < cookies.length; i++) {
+                                var cookieName = cookies[i].split("=");
+                                var paginationCookie = cookieName[0].split("--");
+                                if(paginationCookie[1] == "cookie") {
+                                        jQuery.cookie(cookieName[0], null, {path: "/"});
+                                }
+                        }
+                }
+                
+                jQuery(document).ready(function() {
+                        // init paginateMe
+                        jQuery("#thetable").paginateMe({colToSort: "1", excludeRow: "title"});
+                        jQuery("#rodan").paginateMe({excludeRow: "title"});
+                        jQuery("#ken").paginateMe({colToSort: "5", excludeRow: "title"});
+	        });
+	        
+	        (function($) {
+                        $.fn.paginateMe = function(options) {
+	                        var me = this;
+	                        var selector = me.attr('id');
+	                        var s = $.extend({
+			                'tblList'   :  selector+'List-nav',
+			                'tmpList'   :  selector+"List",
+			                'colToSort' :  '0', // default to sort the First Column of the lists
+			                'excludeRow':  '', // exclude rows with these selectors
+			                'placeNavTo':  '' // place the pagination links in the specified selector
+		                },options);
+		                var col = s.colToSort - 1;
+		                var sortByColNum = col < 0 ? 0 : col;
+		                
+		                // exclude rows(tr) with the class provided on the option
+		                var splitExClass = s.excludeRow.split(",");
+		                var tmpClass = "", ctr = 0;
+		                for(var i=1;i<=splitExClass.length;i++) {
+		                        tmpClass += "."+splitExClass[ctr]+",";
+		                        ctr++;
+		                }
+		                var trimmedSetOfClass = tmpClass.replace(/\s/g, "");
+		                var excluderow = trimmedSetOfClass.slice(0, -1);
+		                
+	                        /*
+	                         * Create Required Elements
+	                         * These next two lines cannot be changed
+	                        */
+	                        if(s.placeNavTo == "") {
+	                                me.before("<div id='"+s.tblList+"'></div>");
+	                        } else {
+	                                $(s.placeNavTo).prepend("<div id='"+s.tblList+"'></div>");
+	                        }
+	                        $("body").prepend("<ul id='"+s.tmpList+"' style='position: absolute; top: 3000'></ul>");
+	                        
+	                        // hide the table rows by default
+	                        me.find("tr:not('"+excluderow+"')").hide();
+	                        
+	                        var lists = "";
+                                me.find("tr:not('"+excluderow+"')").find("td:eq("+sortByColNum+")").each(function() {
+                                        var txt = $(this).text();
+                                        for(var i=0;i<=lists.length;i++) {
+                                                $("#"+s.tmpList).prepend("<li>"+txt+"</li>");
+                                        }
+                                });
+                                
+                                $('#'+s.tmpList).listnav({
+                                        includeAll   :  false,
+                                        includeNums  :  false,
+                                        showCounts   :  false
+                                });
+                                
+                                $("#"+s.tblList).find(".ln-letters a").click(function() {
+                                        var cls = $(this).attr("class");
+                                        var splCls = cls.split(" ");
+                                        $.cookie(selector+"--cookie", splCls[0], {path: "/"});
+                                        
+                                        // hide all rows before showing the list that starts from the selected letter
+                                        me.find("tr:not('"+excluderow+"')").hide();
+                                        
+                                        // display list starting from the selected letter on the pagination
+                                        tableSort(s.tmpList, selector);
+                                });
+                                
+                                /*
+                                 * check if the pagination cookie has a value
+                                 * if it already has a value, the page will stay on the selected letter when the page is refreshed
+                                 * if not, the pagination will find the first letter that has available list and trigger it
+                                */
+                                var navSelected = $.cookie(selector+"--cookie");
+                                $("#"+s.tblList).find(navSelected ? "a."+navSelected : "a."+triggerNext()).trigger("click");
+                                function triggerNext() {
+                                        var cName = $("#"+s.tblList).find("a:not('.ln-disabled')").attr("class");
+                                        return cName[0];
+                                }
+                                
+                                // Sort the LIST - show only List that starts from the Letter that is selected
+                                function tableSort(ml,obj) {
+                                        var listText = new Array();
+                                        var ctr = 0;
+                                        $("#"+ml).find("li").each(function() {
+                                                if($(this).is(":visible")) {
+                                                        listText[ctr] = $.trim($(this).text());
+                                                        $('#'+obj).find("tr:not('"+excluderow+"')").each(function() {
+                                                                var tdTxt = $.trim($(this).find("td:eq("+sortByColNum+")").text());
+                                                                if(listText[ctr] == tdTxt) {
+                                                                        $(this).show().find("td:eq("+sortByColNum+")").css("color", "blue");
+                                                                }
+                                                        });
+                                                        ctr++;
+                                                }
+                                        });
+                                }
+                        };
+                })(jQuery);
+	</script>
+</head>
+        <body>
+                <div>
+                        <table id="thetable" border="0">
+                                <tr class="title">
+                                        <td><strong>Title</strong></td>
+                                        <td><strong>Comment</strong></td>
+                                </tr>
+                                <tr>
+                                        <td><div>adhoc</div></td>
+                                        <td><div>zfsa</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>aussie</div></td>
+                                        <td><div>odf</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>astig</div></td>
+                                        <td><div>not me</td>
+                                </tr>
+                                <tr>
+                                        <td><div>aav</div></td>
+                                        <td><div>me too</td>
+                                </tr>
+                                <tr>
+                                        <td><div>aav</div></td>
+                                        <td><div>kadfd</td>
+                                </tr>
+                                <tr>
+                                        <td><div>aav</div></td>
+                                        <td><div>kadfd</td>
+                                </tr>
+                                <tr>
+                                        <td><div>basura</div></td>
+                                        <td><div>c1</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>tao</div></td>
+                                        <td><div>c2</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>tao</div></td>
+                                        <td><div>c3</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>zaida</div></td>
+                                        <td><div>c4</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>zacarias</div></td>
+                                        <td><div>c5</div></td>
+                                </tr>
+                                <tr class="jener">
+                                        <td><div>zombies</div></td>
+                                        <td><div>c6</div></td>
+                                </tr>
+                        </table>
+                </div>
+                <hr />
+                <div class="tester">
+                        <table id="rodan" border="0">
+                                <tr class="title">
+                                        <td><strong>Title</strong></td>
+                                        <td><strong>Comment</strong></td>
+                                </tr>
+                                <tr>
+                                        <td><div>aRodan</div></td>
+                                        <td><div>zRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>aRodan</div></td>
+                                        <td><div>oRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>aRodan</div></td>
+                                        <td><div>kRodan</td>
+                                </tr>
+                                <tr>
+                                        <td><div>bRodan</div></td>
+                                        <td><div>cRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>bRodan</div></td>
+                                        <td><div>cRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>tRodan</div></td>
+                                        <td><div>cRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>zRodan</div></td>
+                                        <td><div>cRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>zRodan</div></td>
+                                        <td><div>cRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>zRodan</div></td>
+                                        <td><div>cRodan</div></td>
+                                </tr>
+                        </table>
+                </div>
+                <hr />
+                <div>
+                        <table id="ken" border="0">
+                                <tr class="title">
+                                        <td><strong>Title</strong></td>
+                                        <td><strong>Comment</strong></td>
+                                </tr>
+                                <tr>
+                                        <td><div>aRodan</div></td>
+                                        <td><div>zRodan</div></td>
+                                        <td><div>hRodan</div></td>
+                                        <td><div>zRodan</div></td>
+                                        <td><div> </div></td>
+                                        <td><div>zRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>aRodan</div></td>
+                                        <td><div>oRodan</div></td>
+                                        <td><div>yRodan</div></td>
+                                        <td><div>iRodan</div></td>
+                                        <td><div>jRodan</div></td>
+                                        <td><div>eRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>aRodan</div></td>
+                                        <td><div>kRodan</td>
+                                        <td><div>aRodan</div></td>
+                                        <td><div>wRodan</div></td>
+                                        <td><div> </div></td>
+                                        <td><div>eRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>bRodan</div></td>
+                                        <td><div>cRodan</div></td>
+                                        <td><div>aRodan</div></td>
+                                        <td><div>wRodan</div></td>
+                                        <td><div>eRodan</div></td>
+                                        <td><div>zRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>qRodan</div></td>
+                                        <td><div>cRodan</div></td>
+                                        <td><div>aRodan</div></td>
+                                        <td><div>tRodan</div></td>
+                                        <td><div> </div></td>
+                                        <td><div>xRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>tRodan</div></td>
+                                        <td><div>cRodan</div></td>
+                                        <td><div>aRodan</div></td>
+                                        <td><div>pRodan</div></td>
+                                        <td><div>oRodan</div></td>
+                                        <td><div>lRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>zRodan</div></td>
+                                        <td><div>cRodan</div></td>
+                                        <td><div>wRodan</div></td>
+                                        <td><div>zRodan</div></td>
+                                        <td><div>yRodan</div></td>
+                                        <td><div>zRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>yRodan</div></td>
+                                        <td><div>cRodan</div></td>
+                                        <td><div>aRodan</div></td>
+                                        <td><div>iRodan</div></td>
+                                        <td><div>yRodan</div></td>
+                                        <td><div>iRodan</div></td>
+                                </tr>
+                                <tr>
+                                        <td><div>zRodan</div></td>
+                                        <td><div>cRodan</div></td>
+                                        <td><div>aRodan</div></td>
+                                        <td><div>zRodan</div></td>
+                                        <td><div>vRodan</div></td>
+                                        <td><div>bRodan</div></td>
+                                </tr>
+                        </table>
+                </div>
+                <hr />
+                <input type="button" value="Delete Cookies" onclick="resetPaginationCookiesOnFirstLoad()" />
+        </body>
+</html>
+

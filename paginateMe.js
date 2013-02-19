@@ -2,23 +2,6 @@
  * reset pagination Generated cookies
  * Invoke this function on the login button
 */
-function resetPaginationCookiesOnFirstLoad() {
-    var cookies = document.cookie.split(";");
-    for(var i=0; i < cookies.length; i++) {
-        var cookieName = cookies[i].split("=");
-        var paginationCookie = cookieName[0].split("--");
-        if(paginationCookie[1] == "cookie") {
-        	jQuery.cookie(cookieName[0], null, {path: "/"});
-        }
-    }
-}
-    
-jQuery(document).ready(function() {
-	// init paginateMe
-	jQuery("#thetable").paginateMe({colToSort: "1", excludeRow: "title"});
-	jQuery("#rodan").paginateMe({excludeRow: "title"});
-	jQuery("#ken").paginateMe({colToSort: "5", excludeRow: "title"});
-});
 
 (function($) {
     $.fn.paginateMe = function(options) {
